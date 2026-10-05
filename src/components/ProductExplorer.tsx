@@ -19,13 +19,6 @@ export default function ProductExplorer() {
   const [errorMessage, setErrorMessage] = useState("");  // ค่าผิดพลาด
   const [editingProduct, setEditingProduct] = useState<Product | null>(null); //ข้อมูลแก้ไข
 
-  useEffect(() => {
-    fetchProducts(defaultQuery).then(showResult).catch(showError); //เรียก API ดึงข้อมูลด้วยค่าตั้งต้น
-    // เติม: สิ่งที่กำหนดให้ทำงานเพียงครั้งเดียวตอนแสดงผลครั้งแรก
-  }, []);
-  
-
-
   function showResult(list: ProductList) { //เรียกข้อมูล
     setProducts(list.products);
     setStatus("ready");
@@ -50,11 +43,24 @@ export default function ProductExplorer() {
     }
   }
 
+  useEffect(() => {
+    fetchProducts(defaultQuery).then(showResult).catch(showError); //เรียก API ดึงข้อมูลด้วยค่าตั้งต้น
+    // เติม: สิ่งที่กำหนดให้ทำงานเพียงครั้งเดียวตอนแสดงผลครั้งแรก
+  }, []);
+
   function saveProduct(draft: ProductDraft) { //บันทึกข้อมูลหรือแก้ไข
     if (editingProduct) {
       setProducts((current) => 
         current.map((item) =>
-          item.id === editingProduct.id ? { ...item, ...draft } : item
+          item.id === editingProduct.id
+            ? {
+                ...item,
+                ...draft,
+                description: item.description,
+                images: item.images,
+                thumbnail: item.thumbnail,
+              }
+            : item
         )
       );
       setEditingProduct(null);

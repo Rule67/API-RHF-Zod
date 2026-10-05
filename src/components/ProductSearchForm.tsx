@@ -18,24 +18,7 @@ type ProductSearchFormProps = {
 
 export default function ProductSearchForm(
     { onSearch }: ProductSearchFormProps) {
-
-// v1
-//     const { register } = useForm<SearchQuery>({
-//     defaultValues: defaultQuery,
-//   });
-
-// v2
-//   const {
-//     register,
-//     formState: { errors },
-//   } = useForm<SearchQuery>({
-//     // เติม: ตัวเชื่อมที่ทำให้ React Hook Form ตรวจข้อมูลด้วย Zod Schema
-//     resolver: ________(SearchQuerySchema),
-//     mode: "onTouched",
-//     defaultValues: defaultQuery,
-//   });
-
-// v3
+  // จัดการค่าค้นหา ตรวจสอบข้อมูลด้วย Zod และติดตามสถานะการส่งฟอร์ม
   const {
     register,
     handleSubmit,
@@ -46,12 +29,15 @@ export default function ProductSearchForm(
     defaultValues: defaultQuery,
   });
 
+  // ส่งเงื่อนไขค้นหาที่ผ่านการตรวจสอบไปให้ component แม่
+  async function submitSearch(values: SearchQuery) {
+    await onSearch(values);
+  }
+
   return (
     <form
       className="search-form"
-      onSubmit={handleSubmit(async (values) => {
-        await onSearch(values);
-      })}
+      onSubmit={handleSubmit(submitSearch)}
     >
       <div className="form-field full-width">
         <label htmlFor="q">ค้นหา</label>
@@ -92,4 +78,3 @@ export default function ProductSearchForm(
     </form>
   );
 }
-

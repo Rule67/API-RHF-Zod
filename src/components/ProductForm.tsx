@@ -1,6 +1,7 @@
 "use client";
 
 import { useForm } from "react-hook-form";
+import { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CATEGORIES, ProductDraftSchema } from "@/lib/products";
 import type { Product, ProductDraft } from "@/lib/products";
@@ -14,6 +15,7 @@ type ProductFormProps = {
 export default function ProductForm(
   { editing, onSave, onCancel }: ProductFormProps
 ) {
+  // จัดการฟอร์มเพิ่มและแก้ไขสินค้า พร้อมตรวจสอบข้อมูลด้วย Zod
   const {
     register,
     handleSubmit,
@@ -22,17 +24,43 @@ export default function ProductForm(
   } = useForm<ProductDraft>({
     resolver: zodResolver(ProductDraftSchema),
     mode: "onTouched",
-    defaultValues: editing
-      ? { title: editing.title, price: editing.price,
-          stock: editing.stock, category: editing.category }
-      : { title: "", price: undefined, stock: undefined },
+    defaultValues: {
+      title: "",
+      price: undefined,
+      stock: undefined,
+    },
   });
 
-  function saveProduct(values: ProductDraft) {
-  onSave(values);
-  reset();
-}
+  // เติมข้อมูลสินค้าที่เลือกแก้ไข หรือคืนฟอร์มเป็นค่าว่างเมื่อเพิ่มสินค้าใหม่
+  useEffect(() => {
+    if (editing) {
+      reset({
+        title: editing.title,
+        price: editing.price,
+        stock: editing.stock,
+        category: editing.category,
+      });
+      return;
+    }
 
+    reset({
+      title: "",
+      price: undefined,
+      stock: undefined,
+      category: undefined,
+    });
+  }, [editing, reset]);
+
+  // ส่งข้อมูลที่ผ่านการตรวจสอบให้ component แม่ แล้วล้างฟอร์ม
+  function saveProduct(values: ProductDraft) {
+    onSave(values);
+    reset({
+      title: "",
+      price: undefined,
+      stock: undefined,
+      category: undefined,
+    });
+  }
 
   return (
     <form className="product-form" onSubmit={handleSubmit(saveProduct)} noValidate>
